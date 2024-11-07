@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
-//import { EditorPage } from "./pages/EditorPage";
-import { Secret } from "./pages/Secret";
+import EditorPage  from "./pages/EditorPage";
 import "./App.css";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./hooks/UseAuth";
@@ -12,10 +11,10 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route
-          path="/secret"
+          path="/editor"
           element={
             <ProtectedRoute>
-              <Secret />
+              <EditorPage />
             </ProtectedRoute>
           }
         />

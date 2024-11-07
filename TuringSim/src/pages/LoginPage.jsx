@@ -31,10 +31,8 @@ export const LoginPage = () => {
 
       if (error.response && error.response.status === 401) {
         setErrorMessage("Invalid username or password.");
-      } else if (error.response) {
-        setErrorMessage("An error occurred. Please try again later.");
       } else {
-        setErrorMessage("A network error occurred. Please check your connection.");
+        setErrorMessage("Could not validate credentials.");
       }
     }
   };
@@ -45,32 +43,39 @@ export const LoginPage = () => {
 
   return (
     <div>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Login bruh</button>
-      </form>
-      {errorMessage && (
-        <div style={{ color: "red", marginTop: "10px" }}>
-          {errorMessage}
-        </div>
-      )}
+      <div className="title-container">
+        <h1>
+          Turing Machine Simulator
+        </h1>
+      </div>
+      <div className="login-container">
+        <form onSubmit={handleLogin}>
+          <div>
+            <label htmlFor="username">Username:</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="password">Password:</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button type="submit">Login bruh</button>
+        </form>
+        {errorMessage && (
+          <div style={{ color: "red", marginTop: "10px" }}>
+            {errorMessage}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
