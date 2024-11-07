@@ -1,33 +1,27 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { fetchData } from './api';
+import { Routes, Route } from "react-router-dom";
+import { LoginPage } from "./pages/LoginPage";
+//import { EditorPage } from "./pages/EditorPage";
+import { Secret } from "./pages/Secret";
+import "./App.css";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
+import { AuthProvider } from "./hooks/UseAuth";
 
-const baseURL = import.meta.env.VITE_SOURCE_URL;
-
-export default function App() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(baseURL);
-        setData(response.data);
-      } catch (err) {
-        setError(err.message); 
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (error) return <p>Error loading data: {error}</p>;
-  if (!data) return <p>Loading...</p>;
-
+function App() {
   return (
-    <div>
-      <h1>Configurations</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route
+          path="/secret"
+          element={
+            <ProtectedRoute>
+              <Secret />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </AuthProvider>
   );
 }
+
+export default App;
