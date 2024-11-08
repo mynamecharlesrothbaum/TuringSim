@@ -63,7 +63,7 @@ input {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  width: 1300px;
+  width: 1190px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,19 +76,7 @@ input {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.rules-window {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  width: 400px;
+  width: 250px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -105,7 +93,7 @@ input {
   position: relative;
   overflow: hidden;
   white-space: nowrap;
-  width: 1101px;
+  width: 1000px;
   border: 1px solid #ccc;
   padding: 10px;
   justify-content: center;
@@ -129,7 +117,7 @@ input {
 }
 
 .head {
-  background-color: #e0f7fa;
+  background-color: #6889ae;
 }
 
 /* Controls Section */
@@ -140,7 +128,7 @@ input {
 
 button {
   padding: 10px;
-  background-color: #007bff;
+  background-color: #2b629c;
   color: white;
   border: none;
   border-radius: 5px;
@@ -150,10 +138,21 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #213e5e;
 }
 
-/* Rules Editor */
+.rules-window {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  width: 900px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
 .rules-editor {
   width: 100%;
   text-align: center;
@@ -166,6 +165,38 @@ button:hover {
 
 .rules-editor button:hover {
   background-color: #1e7e34;
+}
+
+.rule-inputs{
+  margin: 10px;
+  width: 98%;
+  text-align: center;
+  background-color: #598abe;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.name-fields{
+  width: 100px;
+  display:flex;
+}
+
+.state-fields{
+  display: flex;
+  width: 200px;
+  margin: 20px;
+  gap: 20px;
+  text-align: center;
+}
+
+.state-field input{
+  flex: 1;
+  padding: 10px;
 }
 
 /* Logout Button */
