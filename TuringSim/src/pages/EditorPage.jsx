@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { useAuth } from "../hooks/UseAuth";
 
 const EditorPage = () => {
-  const [tape, setTape] = useState([0, 1, 0, 1, 0, 0, 1]); // Initial tape state
-  const [headPosition, setHeadPosition] = useState(3); // Head starts at the center
+  const MAX_TAPE_LENGTH = 1000;
+  const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
+  const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH/2); // Head starts at the center
+  const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH/2); 
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
   const { logout } = useAuth();
 
@@ -20,16 +22,25 @@ const EditorPage = () => {
     // Logic for stopping the machine
   };
 
+  const handleReset = () => {
+    setTape(Array(MAX_TAPE_LENGTH).fill(0))
+  }
+
   const handleLogout = () => {
     logout();
   };
 
   const handleScrollLeft = () => {
-    setHeadPosition((prev) => Math.max(prev - 1, 0));
+    setViewPosition((prev) => Math.max(prev - 1, 0));
   };
 
   const handleScrollRight = () => {
-    setHeadPosition((prev) => Math.min(prev + 1, tape.length - 1));
+    setViewPosition((prev) => Math.min(prev + 1, tape.length - 1));
+  };
+
+  const calculateOffset = () => {
+    const offset = (1000 / 2) - (50 / 2);
+    return offset - (viewPosition * 50)+16;
   };
 
   return (
@@ -40,7 +51,7 @@ const EditorPage = () => {
           <motion.div 
             className="tape"
             initial={false}
-            animate={{ x: -headPosition * 50 }}
+            animate={{x: calculateOffset()}}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             {tape.map((cell, index) => (
@@ -56,11 +67,12 @@ const EditorPage = () => {
         </div>
         <button onClick={handleScrollRight}>Scroll Right</button>
       </div>
+      <div className="triangle"></div>
       <div className="controls">
         <button onClick={handleRun}>Run</button>
         <button onClick={handleStep}>Step</button>
         <button onClick={handleStop}>Stop</button>
-        <button onClick={() => setTape([0, 0, 0, 0])}>Reset</button>
+        <button onClick={handleReset}>Reset</button>
       </div>
       <div className="rules-editor">
         <h3>Rules</h3>

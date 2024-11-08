@@ -27,7 +27,7 @@ export const LoginPage = () => {
       }
     } catch (error) {
       console.error("Unexpected error during login:", error);
-      setErrorMessage("A network error occurred. Please try again later.");
+      setErrorMessage("Unable to login. Please make sure username and password is corrrect.");
     }
   };
   
@@ -49,7 +49,7 @@ export const LoginPage = () => {
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      setErrorMessage("An error occurred during registration. Please try again.");
+      setErrorMessage("Unable to create account.");
     }
   };
 
@@ -65,6 +65,12 @@ export const LoginPage = () => {
       <div className="login-container">
         <form>
           <div>
+            <div>
+              <h4>Press "Login" to login to an existing account.</h4>
+            </div>
+            <div>
+              <h4>Press "Create Account" to create a new account</h4>
+            </div>
             <label htmlFor="username">Username:</label>
             <input
               id="username"
