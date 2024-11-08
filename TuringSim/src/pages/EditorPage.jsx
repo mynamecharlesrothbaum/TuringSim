@@ -44,42 +44,49 @@ const EditorPage = () => {
   };
 
   return (
-    <div className="editor-container">
-      <div className="tape-container">
-        <button onClick={handleScrollLeft}>Scroll Left</button>
-        <div className="tape-wrapper">
-          <motion.div 
-            className="tape"
-            initial={false}
-            animate={{x: calculateOffset()}}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          >
-            {tape.map((cell, index) => (
-              <motion.div
-                key={index}
-                className={`tape-cell ${index === headPosition ? 'head' : ''}`}
-                style={{ width: 50, height: 50, display: 'inline-block', border: '1px solid black', textAlign: 'center', lineHeight: '50px' }}
-              >
-                {cell}
-              </motion.div>
-            ))}
-          </motion.div>
+    <div className="page-container">
+      <div className="tape-window">
+        <div className="tape-container">
+          <button onClick={handleScrollLeft}>Scroll Left</button>
+          <div className="tape-wrapper">
+            <motion.div 
+              className="tape"
+              initial={false}
+              animate={{ x: calculateOffset() }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              {tape.map((cell, index) => (
+                <motion.div
+                  key={index}
+                  className={`tape-cell ${index === headPosition ? 'head' : ''}`}
+                  style={{ width: 50, height: 50, display: 'inline-block', border: '1px solid black', textAlign: 'center', lineHeight: '50px' }}
+                >
+                  {cell}
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+          <button onClick={handleScrollRight}>Scroll Right</button>
         </div>
-        <button onClick={handleScrollRight}>Scroll Right</button>
+        <div className="triangle"></div>
       </div>
-      <div className="triangle"></div>
-      <div className="controls">
+      <div className="controls-window">
+        <h3>Controls</h3>
         <button onClick={handleRun}>Run</button>
         <button onClick={handleStep}>Step</button>
         <button onClick={handleStop}>Stop</button>
-        <button onClick={handleReset}>Reset</button>
+        <button onClick={() => setTape(Array(MAX_TAPE_LENGTH).fill(0))}>Reset</button>
       </div>
-      <div className="rules-editor">
-        <h3>Rules</h3>
-        {/* Map through existing rules and display them here */}
-        <button onClick={() => setRules([...rules, {}])}>Add Rule</button>
+      <div className="rules-window">
+        <div className="rules-editor">
+          <h3>Rules</h3>
+          {/* Map through existing rules and display them here */}
+          <button onClick={() => setRules([...rules, {}])}>Add Rule</button>
+        </div>
       </div>
-      <button onClick={handleLogout}>Logout</button>
+      <div className="logout-window">
+        <button onClick={handleLogout}>Logout</button>
+      </div>
     </div>
   );
 };
