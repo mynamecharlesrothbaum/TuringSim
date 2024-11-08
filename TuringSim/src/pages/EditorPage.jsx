@@ -86,43 +86,57 @@ const EditorPage = () => {
             <div key={index} className="rule" style={{ overflow: 'hidden' }}>
               <div className="rule-inputs">
                 <div className="name-fields">
-                  <input type="text" placeholder="Name" value={rule.name || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].name = e.target.value;
-                    setRules(newRules);
-                  }} />
+                  <div className="input-field">
+                    <h5>state name</h5>
+                    <input type="text" placeholder="Name" value={rule.name || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].name = e.target.value;
+                      setRules(newRules);
+                    }} />
+                  </div>
                 </div>
                 <div className="state-fields">
-                  <h5>name:</h5>
-                  <input type="text" value={rule.previousState || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].previousState = e.target.value;
-                    setRules(newRules);
-                  }} style={{ width: '32px' }}/>
-                  <h5>name:</h5>
-                  <input type="text" value={rule.readSymbol || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].readSymbol = e.target.value;
-                    setRules(newRules);
-                  }} style={{ width: '32px' }}/>
-                  <h5>name:</h5>
-                  <input type="text" value={rule.writeSymbol || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].writeSymbol = e.target.value;
-                    setRules(newRules);
-                  }}style={{ width: '32px' }} />
-                  <h5>name:</h5>
-                  <input type="text" value={rule.nextState || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].nextState = e.target.value;
-                    setRules(newRules);
-                  }}style={{ width: '32px' }} />
-                  <h5>name:</h5>
-                  <input type="text" value={rule.moveDirection || ''} onChange={(e) => {
-                    const newRules = [...rules];
-                    newRules[index].moveDirection = e.target.value;
-                    setRules(newRules);
-                  }} style={{ width: '32px' }}/>
+                  <div className="input-field">
+                    <h5>previous state</h5>
+                    <input type="text" value={rule.previousState || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].previousState = e.target.value;
+                      setRules(newRules);
+                    }} style={{ width: '32px' }}/>
+                  </div>
+                  <div className="input-field">
+                    <h5>read symbol</h5>
+                    <input type="text" value={rule.readSymbol || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].readSymbol = e.target.value;
+                      setRules(newRules);
+                    }} style={{ width: '32px' }}/>
+                  </div>
+                  <div className="input-field">
+                    <h5>write symbol</h5>
+                    <input type="text" value={rule.writeSymbol || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].writeSymbol = e.target.value;
+                      setRules(newRules);
+                    }}style={{ width: '32px' }} />
+                  </div>
+                  <div className="input-field">
+                    <h5>next state</h5>
+                    <input type="text" value={rule.nextState || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].nextState = e.target.value;
+                      setRules(newRules);
+                    }}style={{ width: '32px' }} />
+                  </div>
+                  <div className="input-field">
+                    <h5>move direction</h5>
+                    <input type="text" value={rule.moveDirection || ''} onChange={(e) => {
+                      const newRules = [...rules];
+                      newRules[index].moveDirection = e.target.value;
+                      setRules(newRules);
+                    }} style={{ width: '32px' }}/>
+                  </div>
+                  <button onClick={() => setRules} style={{ width: '2000px' }}>Create Rule</button>
                 </div>
               </div>
             </div>
