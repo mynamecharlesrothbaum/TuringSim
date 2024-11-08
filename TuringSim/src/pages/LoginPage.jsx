@@ -5,7 +5,6 @@ export const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const { login, register } = useAuth();
 
@@ -89,14 +88,12 @@ export const LoginPage = () => {
             />
           </div>
 
-          {/* Login Button */}
-          <button type="button" onClick={handleLogin} disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          <button type="button" onClick={handleLogin}>
+            Login
           </button>
 
-          {/* Create Account Button */}
-          <button type="button" onClick={handleRegister} disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
+          <button type="button" onClick={handleRegister}>
+            Create Account
           </button>
         </form>
 

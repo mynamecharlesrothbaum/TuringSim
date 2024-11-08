@@ -7,6 +7,7 @@ const EditorPage = () => {
   const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
   const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH/2); // Head starts at the center
   const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH/2); 
+  const [errorMessage, setErrorMessage] = useState(null);
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
   const { logout } = useAuth();
 
@@ -23,7 +24,8 @@ const EditorPage = () => {
   };
 
   const handleReset = () => {
-    setTape(Array(MAX_TAPE_LENGTH).fill(0))
+    setTape(Array(MAX_TAPE_LENGTH).fill(0));
+    setViewPosition((prev) => MAX_TAPE_LENGTH/2);
   }
 
   const handleLogout = () => {
@@ -44,8 +46,25 @@ const EditorPage = () => {
     setRules(newRules);
   };
 
+  const areAllRulesFilled = () => {
+    return rules.every(rule => 
+      rule.name &&
+      rule.previousState &&
+      rule.readSymbol &&
+      rule.writeSymbol &&
+      rule.nextState &&
+      rule.moveDirection
+    );
+  };
+
   const handleSaveRule = () => {
-    console.log(rules);
+    if(!areAllRulesFilled){
+      setErrorMessage("Missing fields in 1 or more rules. (Use 'NA' for fields that should be empty)");
+      return;
+    }
+    const rulesJson = JSON.stringify(rules);
+    const namedRulesJson = JSON.stringify({"test": JSON.parse(rulesJson) });
+    console.log(namedRulesJson);
   };
 
   const calculateOffset = () => {
@@ -86,7 +105,7 @@ const EditorPage = () => {
         <button onClick={handleRun}>Run</button>
         <button onClick={handleStep}>Step</button>
         <button onClick={handleStop}>Stop</button>
-        <button onClick={() => setTape(Array(MAX_TAPE_LENGTH).fill(0))}>Reset</button>
+        <button onClick={handleReset}>Reset</button>
       </div>
       <div className="rules-window">
         <h3>Rules</h3>
@@ -153,6 +172,7 @@ const EditorPage = () => {
           ))}
           <button onClick={() => setRules([...rules, {}])}>Add Rule</button>
         </div>
+        <button onClick={handleSaveRule}> Set Rules </button>
       </div>
       <div className="logout-window">
         <button onClick={handleLogout}>Logout</button>
