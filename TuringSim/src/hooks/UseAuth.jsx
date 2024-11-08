@@ -38,6 +38,22 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const save = async (data) => {
+    if (user && user.username) {
+      const payload = {
+        username: user.username,
+        ...data,
+      };
+      try {
+        console.log("Save data:", payload);
+      } catch (error) {
+        console.error("Error while saving:", error);
+      }
+    } else {
+      console.error("User is not logged in or username is not available");
+    }
+  };
+
   // call this function to sign out logged in user
   const logout = () => {
     setUser(null);
@@ -50,6 +66,7 @@ export const AuthProvider = ({ children }) => {
       login,
       logout,
       register,
+      save,
     }),
     [user]
   );

@@ -10,7 +10,7 @@ const EditorPage = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [configName, setConfigName] = useState("");
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
-  const { logout } = useAuth();
+  const { logout, save} = useAuth();
 
   const handleRun = () => {
     // Logic for running the Turing Machine continuously
@@ -63,7 +63,7 @@ const EditorPage = () => {
   };
 
 
-  const handleSaveRules = () => {
+  const handleSaveRules = async () => {
     setErrorMessage(null);
     if (!checkRules()) {
       setErrorMessage("Missing fields in 1 or more rules. (Use 'na' for fields that should be empty)");
@@ -75,8 +75,9 @@ const EditorPage = () => {
     }
     
     const rulesJson = JSON.stringify({configName, rules});
+    const result = await save(rulesJson);
 
-    console.log(rulesJson);
+
   };
 
   const handleSetRules = () => {
