@@ -5,35 +5,51 @@ export const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErrorMessage(null); // Clear previous errors
+    setErrorMessage(null);
+  
+    const data = { username, password };
+    
+    try {
+      const result = await login(data);
+      
+      if (result.message === "Authentication successful") {
+        setErrorMessage(null);
+        console.log("Successful authentication");
+      } else {
+        console.error("Login failed:", result.message);
+        setErrorMessage(result.message || "An error occurred during authentication.");
+      }
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
+      setErrorMessage("A network error occurred. Please try again later.");
+    }
+  };
+  
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setErrorMessage(null);
 
     const data = { username, password };
 
     try {
-      // Attempt login
-      const response = await login(data);
-      console.log("Full response:", response);
+      const result = await register(data);
 
-      // Handle successful response
-      if (response.message === "Authentication successful") {
+      if (result.message === "Account created successfully") {
         setErrorMessage(null);
-        console.log("Successful authentication");
+        console.log("Account created successfully");
       } else {
-        setErrorMessage("Invalid username or password.");
+        setErrorMessage("Unable to create account");
       }
     } catch (error) {
-      console.error("Error during login:", error);
-
-      if (error.response && error.response.status === 401) {
-        setErrorMessage("Invalid username or password.");
-      } else {
-        setErrorMessage("Could not validate credentials.");
-      }
+      console.error("Error during registration:", error);
+      setErrorMessage("An error occurred during registration. Please try again.");
     }
   };
 
@@ -44,12 +60,10 @@ export const LoginPage = () => {
   return (
     <div>
       <div className="title-container">
-        <h1>
-          Turing Machine Simulator
-        </h1>
+        <h1>Turing Machine Simulator</h1>
       </div>
       <div className="login-container">
-        <form onSubmit={handleLogin}>
+        <form>
           <div>
             <label htmlFor="username">Username:</label>
             <input
@@ -68,8 +82,18 @@ export const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit">Login bruh</button>
+
+          {/* Login Button */}
+          <button type="button" onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          {/* Create Account Button */}
+          <button type="button" onClick={handleRegister} disabled={loading}>
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
         </form>
+
         {errorMessage && (
           <div style={{ color: "red", marginTop: "10px" }}>
             {errorMessage}

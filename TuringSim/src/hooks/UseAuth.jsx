@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
-import { getAuthentication } from "../api/apiService";
+import { getAuthentication, getRegistration } from "../api/apiService";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -12,24 +12,31 @@ export const AuthProvider = ({ children }) => {
 
   // call this function when you want to authenticate the user
   const login = async (data) => {
-    try{
+    try {
       const response = await getAuthentication(data);
-
-      console.log("full response", response);
-
-      if(response.message === "Authentication successful"){
+      if (response.message === "Authentication successful") {
         setUser(data);
-        console.log("Succesfull authentication");
+        console.log("Successful authentication");
         navigate("/editor");
+        return response;
       }
-    } catch (error){
-      if (error.response && error.response.status === 401) {
-        console.error("Authentication failed: Invalid credentials");
-      } else {
-        console.error("Authentication failed:", error);
-      }
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
     }
   };
+
+  const register = async (data) => {
+    try{
+      const response = await getRegistration(data);
+      if(response.message === "Account created successfully"){
+        setUser(data);
+        console.log("Registration success");
+        navigate("/editor");
+      }
+    } catch (error) {
+        console.error("Could not create account:", error);
+    }
+  }
 
   // call this function to sign out logged in user
   const logout = () => {
@@ -42,6 +49,7 @@ export const AuthProvider = ({ children }) => {
       user,
       login,
       logout,
+      register,
     }),
     [user]
   );
