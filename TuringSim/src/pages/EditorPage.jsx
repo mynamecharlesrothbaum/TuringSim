@@ -5,9 +5,10 @@ import { useAuth } from "../hooks/UseAuth";
 const EditorPage = () => {
   const MAX_TAPE_LENGTH = 1000;
   const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
-  const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH/2); // Head starts at the center
-  const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH/2); 
+  const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2); // Head starts at the center
+  const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [configName, setConfigName] = useState("");
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
   const { logout } = useAuth();
 
@@ -25,7 +26,7 @@ const EditorPage = () => {
 
   const handleReset = () => {
     setTape(Array(MAX_TAPE_LENGTH).fill(0));
-    setViewPosition((prev) => MAX_TAPE_LENGTH/2);
+    setViewPosition((prev) => MAX_TAPE_LENGTH / 2);
   }
 
   const handleLogout = () => {
@@ -45,26 +46,41 @@ const EditorPage = () => {
     newRules.splice(index, 1);
     setRules(newRules);
   };
-
-  const areAllRulesFilled = () => {
+  
+  const checkRules = () => {
     return rules.every(rule => 
-      rule.name &&
-      rule.previousState &&
-      rule.readSymbol &&
-      rule.writeSymbol &&
-      rule.nextState &&
-      rule.moveDirection
+      rule &&
+      typeof rule === 'object' &&
+      Object.keys(rule).length > 0 &&
+  
+      rule.name && rule.name.trim().length > 0 &&
+      rule.previousState && rule.previousState.trim().length > 0 &&
+      rule.readSymbol && rule.readSymbol.trim().length > 0 &&
+      rule.writeSymbol && rule.writeSymbol.trim().length > 0 &&
+      rule.nextState && rule.nextState.trim().length > 0 &&
+      rule.moveDirection && rule.moveDirection.trim().length > 0
     );
   };
 
-  const handleSaveRule = () => {
-    if(!areAllRulesFilled){
-      setErrorMessage("Missing fields in 1 or more rules. (Use 'NA' for fields that should be empty)");
+
+  const handleSaveRules = () => {
+    setErrorMessage(null);
+    if (!checkRules()) {
+      setErrorMessage("Missing fields in 1 or more rules. (Use 'na' for fields that should be empty)");
       return;
     }
-    const rulesJson = JSON.stringify(rules);
-    const namedRulesJson = JSON.stringify({"test": JSON.parse(rulesJson) });
-    console.log(namedRulesJson);
+    if(configName === ""){
+      setErrorMessage("Please type a configuration name.");
+      return;
+    }
+    
+    const rulesJson = JSON.stringify({configName, rules});
+
+    console.log(rulesJson);
+  };
+
+  const handleSetRules = () => {
+
   };
 
   const calculateOffset = () => {
@@ -79,7 +95,7 @@ const EditorPage = () => {
         <div className="tape-container">
           <button onClick={handleScrollLeft}>Scroll Left</button>
           <div className="tape-wrapper">
-            <motion.div 
+            <motion.div
               className="tape"
               initial={false}
               animate={{ x: calculateOffset() }}
@@ -110,7 +126,7 @@ const EditorPage = () => {
       <div className="rules-window">
         <h3>Rules</h3>
         <div className="rules-editor" style={{ overflowY: 'auto', maxHeight: '400px', padding: '10px', border: '1px solid #ccc', overflowX: 'hidden' }}>
-          
+
           {rules.map((rule, index) => (
             <div key={index} className="rule" style={{ overflow: 'hidden' }}>
               <div className="rule-inputs">
@@ -131,7 +147,7 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].previousState = e.target.value;
                       setRules(newRules);
-                    }} style={{ width: '32px' }}/>
+                    }} style={{ width: '32px' }} />
                   </div>
                   <div className="input-field">
                     <h5>read symbol</h5>
@@ -139,7 +155,7 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].readSymbol = e.target.value;
                       setRules(newRules);
-                    }} style={{ width: '32px' }}/>
+                    }} style={{ width: '32px' }} />
                   </div>
                   <div className="input-field">
                     <h5>write symbol</h5>
@@ -147,7 +163,7 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].writeSymbol = e.target.value;
                       setRules(newRules);
-                    }}style={{ width: '32px' }} />
+                    }} style={{ width: '32px' }} />
                   </div>
                   <div className="input-field">
                     <h5>next state</h5>
@@ -155,7 +171,7 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].nextState = e.target.value;
                       setRules(newRules);
-                    }}style={{ width: '32px' }} />
+                    }} style={{ width: '32px' }} />
                   </div>
                   <div className="input-field">
                     <h5>move direction</h5>
@@ -163,16 +179,33 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].moveDirection = e.target.value;
                       setRules(newRules);
-                    }} style={{ width: '32px' }}/>
+                    }} style={{ width: '32px' }} />
                   </div>
                   <button onClick={() => handleDeleteRule(index)}>Delete Rule</button>
                 </div>
               </div>
             </div>
           ))}
-          <button onClick={() => setRules([...rules, {}])}>Add Rule</button>
+          <button onClick={() => setRules([...rules, {
+            name: "",
+            previousState: "",
+            readSymbol: "",
+            writeSymbol: "",
+            nextState: "",
+            moveDirection: ""
+          }])}>Add Rule</button>
+
         </div>
-        <button onClick={handleSaveRule}> Set Rules </button>
+        <div className="save-buttons">
+          <button onClick={handleSetRules}> Set Rules </button>
+          <button onClick={handleSaveRules}>Save Configuration </button>
+          <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
+        </div>
+        {errorMessage && (
+          <div style={{ color: "red", marginTop: "10px" }}>
+            {errorMessage}
+          </div>
+        )}
       </div>
       <div className="logout-window">
         <button onClick={handleLogout}>Logout</button>
