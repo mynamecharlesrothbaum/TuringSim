@@ -38,6 +38,16 @@ const EditorPage = () => {
     setViewPosition((prev) => Math.min(prev + 1, tape.length - 1));
   };
 
+  const handleDeleteRule = (index) => {
+    const newRules = [...rules];
+    newRules.splice(index, 1);
+    setRules(newRules);
+  };
+
+  const handleSaveRule = () => {
+    console.log(rules);
+  };
+
   const calculateOffset = () => {
     const offset = (1000 / 2) - (50 / 2);
     return offset - (viewPosition * 50) + -34;
@@ -136,7 +146,7 @@ const EditorPage = () => {
                       setRules(newRules);
                     }} style={{ width: '32px' }}/>
                   </div>
-                  <button onClick={() => setRules} style={{ width: '2000px' }}>Create Rule</button>
+                  <button onClick={() => handleDeleteRule(index)}>Delete Rule</button>
                 </div>
               </div>
             </div>
