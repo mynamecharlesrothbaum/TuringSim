@@ -3,6 +3,7 @@ const baseURL = import.meta.env.VITE_SOURCE_URL;
 const configurationsEndpoint = "/configurations";
 const authenticationsEndpoint = "/authentications";
 const registrationsEndpoint = "/registrations";
+const savesEndpoint = "/saves";
 
 export const fetchData = async () => {
   try {
@@ -24,6 +25,15 @@ export const getAuthentication = async (data) => {
 
 export const getRegistration = async (data) => {
   const response = await axios.post(`${baseURL}${registrationsEndpoint}`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+}
+
+export const getSave = async (data) => {
+  const response = await axios.post(`${baseURL}${savesEndpoint}`, data, {
     headers: {
       'Content-Type': 'application/json'
     }

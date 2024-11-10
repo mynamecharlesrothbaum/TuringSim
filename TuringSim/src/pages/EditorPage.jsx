@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from "../hooks/UseAuth";
 
 const EditorPage = () => {
-  const MAX_TAPE_LENGTH = 1000;
+  const MAX_TAPE_LENGTH = 10;
   const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
   const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2); // Head starts at the center
   const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH / 2);
@@ -74,7 +74,7 @@ const EditorPage = () => {
       return;
     }
     
-    const rulesJson = JSON.stringify({configName, rules});
+    const rulesJson = JSON.stringify({configName, tape, rules});
     const result = await save(rulesJson);
 
 

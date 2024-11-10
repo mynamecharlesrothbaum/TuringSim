@@ -3,8 +3,11 @@
 import { createContext, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
-import { getAuthentication, getRegistration } from "../api/apiService";
+import { getAuthentication, getRegistration, getSave } from "../api/apiService";
+import dayjs from 'dayjs';
+
 const AuthContext = createContext();
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useLocalStorage("user", null);
@@ -39,13 +42,14 @@ export const AuthProvider = ({ children }) => {
   }
 
   const save = async (data) => {
+    console.log("Data received in save:", data);
+    data = JSON.parse(data);
     if (user && user.username) {
-      const payload = {
-        username: user.username,
-        ...data,
-      };
+      data.username = user.username;
+      data.date_updated = dayjs().format('YYYY-MM-DD HH:mm:ss');
       try {
-        console.log("Save data:", payload);
+        console.log("Save data:", data);
+        const response = await getSave(data);
       } catch (error) {
         console.error("Error while saving:", error);
       }
