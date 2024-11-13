@@ -3,14 +3,16 @@ import { motion } from 'framer-motion';
 import { useAuth } from "../hooks/UseAuth";
 
 const EditorPage = () => {
-  const MAX_TAPE_LENGTH = 10;
+  const MAX_TAPE_LENGTH = 128;
   const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
   const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2); // Head starts at the center
   const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [configName, setConfigName] = useState("");
+  const [loadConfigName, setLoadConfigName] = useState("");
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
-  const { logout, save} = useAuth();
+  const { logout, save, load} = useAuth();
 
   const handleRun = () => {
     // Logic for running the Turing Machine continuously
@@ -65,6 +67,8 @@ const EditorPage = () => {
 
   const handleSaveRules = async () => {
     setErrorMessage(null);
+    setSuccessMessage(null);
+
     if (!checkRules()) {
       setErrorMessage("Missing fields in 1 or more rules. (Use 'na' for fields that should be empty)");
       return;
@@ -77,12 +81,28 @@ const EditorPage = () => {
     const rulesJson = JSON.stringify({configName, tape, rules});
     const result = await save(rulesJson);
 
+    if(result.message === "Configuration and states saved successfully"){
+      setSuccessMessage("Saved Successfully!")
+    }
+  };
+
+  const handleLoadRules = async () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if(loadConfigName === ""){
+      setErrorMessage("Please enter a configuration name.");
+      return;
+    }
+
+    const result = await load(JSON.stringify({loadConfigName}));
+
 
   };
 
-  const handleSetRules = () => {
+  const handleSetRules = async () => {
 
-  };
+  }
 
   const calculateOffset = () => {
     const offset = (1000 / 2) - (50 / 2);
@@ -197,14 +217,25 @@ const EditorPage = () => {
           }])}>Add Rule</button>
 
         </div>
-        <div className="save-buttons">
-          <button onClick={handleSetRules}> Set Rules </button>
-          <button onClick={handleSaveRules}>Save Configuration </button>
-          <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
+        <div className="save-load-button-window">
+          <div className="save-buttons">
+            <button onClick={handleSetRules}> Set Rules </button>
+            <button onClick={handleSaveRules}>Save Configuration </button>
+            <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
+          </div>
+          <div className="load-buttons">
+            <button onClick={handleLoadRules}>Load Configuration </button>
+            <input id="load_config_name" type="text" value={loadConfigName} onChange={(e) => setLoadConfigName(e.target.value)} ></input>
+          </div>
         </div>
         {errorMessage && (
           <div style={{ color: "red", marginTop: "10px" }}>
             {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div style={{ color: "green", marginTop: "10px" }}>
+            {successMessage}
           </div>
         )}
       </div>
