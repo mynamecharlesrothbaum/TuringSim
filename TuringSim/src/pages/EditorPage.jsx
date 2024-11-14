@@ -14,9 +14,50 @@ const EditorPage = () => {
   const [rules, setRules] = useState([]); // Rules for the Turing Machine
   const { logout, save, load} = useAuth();
 
-  const handleRun = () => {
-    // Logic for running the Turing Machine continuously
+  
+  const handleRun = async () => {
+    let running = true;
+    let currentRule = rules.find(r => r.previousState === undefined);
+  
+    let localTape = [...tape];
+    let localHeadPosition = headPosition;
+  
+    while (running) {
+      const currentSymbol = localTape[localHeadPosition];
+  
+      if (!currentRule) {
+        running = false;
+        console.log('Halted: No matching rule found');
+        break;
+      }
+  
+      const { readSymbol, writeSymbol, moveDirection, nextState } = currentRule;
+  
+      if (currentSymbol === readSymbol) {
+        localTape[localHeadPosition] = writeSymbol;
+        setTape([...localTape]);
+      }
+      if (moveDirection === 'R') {
+        localHeadPosition = Math.min(localHeadPosition + 1, localTape.length - 1);
+        setHeadPosition(localHeadPosition);
+        handleScrollRight();
+      }
+      if (moveDirection === 'L') {
+        localHeadPosition = Math.max(localHeadPosition - 1, 0);
+        setHeadPosition(localHeadPosition);
+        handleScrollLeft();
+      }
+
+      await wait(600);
+      currentRule = rules.find(r => r.name === nextState);
+    }
   };
+  
+  
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   const handleStep = () => {
     // Logic for executing a single step
@@ -29,6 +70,7 @@ const EditorPage = () => {
   const handleReset = () => {
     setTape(Array(MAX_TAPE_LENGTH).fill(0));
     setViewPosition((prev) => MAX_TAPE_LENGTH / 2);
+    setHeadPosition((prev) => MAX_TAPE_LENGTH / 2);
   }
 
   const handleLogout = () => {
@@ -69,10 +111,10 @@ const EditorPage = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!checkRules()) {
-      setErrorMessage("Missing fields in 1 or more rules. (Use 'na' for fields that should be empty)");
-      return;
-    }
+    //if (!checkRules()) {
+     // setErrorMessage("Missing/Invalid fields in 1 or more rules. (Use 'na' for fields that should be empty)");
+     // return;
+   // }
     if(configName === ""){
       setErrorMessage("Please type a configuration name.");
       return;
@@ -89,15 +131,26 @@ const EditorPage = () => {
   const handleLoadRules = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-
-    if(loadConfigName === ""){
+  
+    if (loadConfigName === "") {
       setErrorMessage("Please enter a configuration name.");
       return;
     }
-
-    const result = await load(JSON.stringify({loadConfigName}));
-
-
+  
+    const result = await load(JSON.stringify({ loadConfigName }));
+    console.log(result.rules);
+  
+    const newRules = result.rules.map(rule => ({
+      name: rule.name,
+      previousState: rule.previousState,
+      readSymbol: rule.readSymbol,
+      writeSymbol: rule.writeSymbol,
+      nextState: rule.nextState,
+      moveDirection: rule.moveDirection
+    }));
+  
+    // Set the rules state once after the loop
+    setRules(newRules);
   };
 
   const handleSetRules = async () => {
@@ -154,7 +207,7 @@ const EditorPage = () => {
                 <div className="name-fields">
                   <div className="input-field">
                     <h5>state name</h5>
-                    <input type="text" placeholder="Name" value={rule.name || ''} onChange={(e) => {
+                    <input type="text" placeholder="Name" value={rule.name} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].name = e.target.value;
                       setRules(newRules);
@@ -164,7 +217,7 @@ const EditorPage = () => {
                 <div className="state-fields">
                   <div className="input-field">
                     <h5>previous state</h5>
-                    <input type="text" value={rule.previousState || ''} onChange={(e) => {
+                    <input type="text" value={rule.previousState ?? 'na'} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].previousState = e.target.value;
                       setRules(newRules);
@@ -172,7 +225,7 @@ const EditorPage = () => {
                   </div>
                   <div className="input-field">
                     <h5>read symbol</h5>
-                    <input type="text" value={rule.readSymbol || ''} onChange={(e) => {
+                    <input type="text" value={rule.readSymbol ?? ''} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].readSymbol = e.target.value;
                       setRules(newRules);
@@ -180,7 +233,7 @@ const EditorPage = () => {
                   </div>
                   <div className="input-field">
                     <h5>write symbol</h5>
-                    <input type="text" value={rule.writeSymbol || ''} onChange={(e) => {
+                    <input type="text" value={rule.writeSymbol ?? ''} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].writeSymbol = e.target.value;
                       setRules(newRules);
@@ -188,7 +241,7 @@ const EditorPage = () => {
                   </div>
                   <div className="input-field">
                     <h5>next state</h5>
-                    <input type="text" value={rule.nextState || ''} onChange={(e) => {
+                    <input type="text" value={rule.nextState ?? 'na'} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].nextState = e.target.value;
                       setRules(newRules);
@@ -196,7 +249,7 @@ const EditorPage = () => {
                   </div>
                   <div className="input-field">
                     <h5>move direction</h5>
-                    <input type="text" value={rule.moveDirection || ''} onChange={(e) => {
+                    <input type="text" value={rule.moveDirection ?? ''} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].moveDirection = e.target.value;
                       setRules(newRules);

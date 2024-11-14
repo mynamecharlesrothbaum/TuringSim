@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
 
 const AuthContext = createContext();
 
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useLocalStorage("user", null);
   const navigate = useNavigate();
@@ -66,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     console.log(data);
     try{
       const response = await getLoad(data);
+      console.log("load got response: ", response);
       return response
     }
     catch(error){
