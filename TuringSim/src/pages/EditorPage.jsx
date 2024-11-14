@@ -25,7 +25,7 @@ const EditorPage = () => {
     setRunning(true);
     runningRef.current = true;
   
-    let currentRule = rules.find(r => r.previousState === undefined);
+    let currentRule = rules.find(r => r.previousState === 'na');
     let localTape = [...tape];
     let localHeadPosition = headPosition;
   
@@ -41,7 +41,7 @@ const EditorPage = () => {
   
       const { readSymbol, writeSymbol, moveDirection, nextState } = currentRule;
   
-      if (currentSymbol === readSymbol) {
+      if (currentSymbol.toString() === readSymbol.toString()) {
         localTape[localHeadPosition] = writeSymbol;
         setTape([...localTape]);
       }
@@ -77,6 +77,7 @@ const EditorPage = () => {
   };
 
   const handleReset = () => {
+    handleStop();
     setTape(Array(MAX_TAPE_LENGTH).fill(0));
     setViewPosition((prev) => MAX_TAPE_LENGTH / 2);
     setHeadPosition((prev) => MAX_TAPE_LENGTH / 2);
@@ -101,11 +102,27 @@ const EditorPage = () => {
   };
   
   const checkRules = () => {
-    return rules.every(rule => 
+    setErrorMessage(null);
+
+    for (const rule of rules) {
+      if (typeof rule === 'object' && rule !== null) {
+
+        rule.name = String(rule.name);
+        rule.previousState = String(rule.previousState);
+        rule.readSymbol = String(rule.readSymbol); 
+        rule.writeSymbol = String(rule.writeSymbol);
+        rule.nextState = String(rule.nextState);
+        rule.moveDirection = String(rule.moveDirection);
+
+      } else {
+        setErrorMessage("Invalid rule detected", rule);
+      }
+    }
+  
+    return rules.every(rule =>
       rule &&
       typeof rule === 'object' &&
       Object.keys(rule).length > 0 &&
-  
       rule.name && rule.name.trim().length > 0 &&
       rule.previousState && rule.previousState.trim().length > 0 &&
       rule.readSymbol && rule.readSymbol.trim().length > 0 &&
@@ -119,6 +136,8 @@ const EditorPage = () => {
   const handleSaveRules = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
+
+    console.log("rules in save",rules);
 
     if (!checkRules()) {
       setErrorMessage("Missing/Invalid fields in 1 or more rules. (Use 'na' for fields that should be empty)");
@@ -147,16 +166,20 @@ const EditorPage = () => {
     }
   
     const result = await load(JSON.stringify({ loadConfigName }));
-    console.log(result.rules);
-  
-    const newRules = result.rules.map(rule => ({
-      name: rule.name,
-      previousState: rule.previousState,
-      readSymbol: rule.readSymbol,
-      writeSymbol: rule.writeSymbol,
-      nextState: rule.nextState,
-      moveDirection: rule.moveDirection
-    }));
+    console.log("rules got in handleLoad",result.rules);
+
+
+    const newRules = result.rules.map((rule, index) => {
+      console.log(`Rule ${index} name:`, rule.name); 
+      return {
+        name: rule.name === undefined || rule.name === '' ? 'defaultName' : rule.name, 
+        previousState: rule.previousState === undefined ? 'na' : rule.previousState,
+        readSymbol: rule.readSymbol,
+        writeSymbol: rule.writeSymbol,
+        nextState: rule.nextState === undefined ? 'na' : rule.nextState,
+        moveDirection: rule.moveDirection
+      };
+    });
   
     setRules(newRules);
   };
@@ -241,7 +264,7 @@ const EditorPage = () => {
                     <h5>state name</h5>
                     <input type="text" placeholder="Name" value={rule.name} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].name = e.target.value;
+                      newRules[index].name = e.target.value.toString();
                       setRules(newRules);
                     }} />
                   </div>
@@ -251,7 +274,7 @@ const EditorPage = () => {
                     <h5>previous state</h5>
                     <input type="text" value={rule.previousState ?? 'na'} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].previousState = e.target.value;
+                      newRules[index].previousState = e.target.value.toString();
                       setRules(newRules);
                     }} style={{ width: '72px' }} />
                   </div>
@@ -259,7 +282,7 @@ const EditorPage = () => {
                     <h5>read symbol</h5>
                     <input type="text" value={rule.readSymbol ?? ''} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].readSymbol = e.target.value;
+                      newRules[index].readSymbol = e.target.value.toString();
                       setRules(newRules);
                     }} style={{ width: '32px' }} />
                   </div>
@@ -267,7 +290,7 @@ const EditorPage = () => {
                     <h5>write symbol</h5>
                     <input type="text" value={rule.writeSymbol ?? ''} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].writeSymbol = e.target.value;
+                      newRules[index].writeSymbol = e.target.value.toString();
                       setRules(newRules);
                     }} style={{ width: '32px' }} />
                   </div>
@@ -276,7 +299,7 @@ const EditorPage = () => {
                     <h5>next state </h5>
                     <input type="text" value={rule.nextState ?? 'na'} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].nextState = e.target.value;
+                      newRules[index].nextState = e.target.value.toString();
                       setRules(newRules);
                     }} style={{ width: '72px' }} />
                   </div>
@@ -284,7 +307,7 @@ const EditorPage = () => {
                     <h5>move direction</h5>
                     <input type="text" value={rule.moveDirection ?? ''} onChange={(e) => {
                       const newRules = [...rules];
-                      newRules[index].moveDirection = e.target.value;
+                      newRules[index].moveDirection = e.target.value.toString();
                       setRules(newRules);
                     }} style={{ width: '32px' }} />
                   </div>
