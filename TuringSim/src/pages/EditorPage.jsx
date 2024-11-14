@@ -1,32 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from "../hooks/UseAuth";
 
 const EditorPage = () => {
   const MAX_TAPE_LENGTH = 128;
-  const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0)); // Initial tape state
-  const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2); // Head starts at the center
+  const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0));
+  const [running, setRunning] = useState(false);
+  const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [configName, setConfigName] = useState("");
   const [loadConfigName, setLoadConfigName] = useState("");
-  const [rules, setRules] = useState([]); // Rules for the Turing Machine
+  const [rules, setRules] = useState([]); 
   const { logout, save, load} = useAuth();
 
+  const runningRef = useRef(running);
+
+  React.useEffect(() => {
+    runningRef.current = running;
+  }, [running]);
   
   const handleRun = async () => {
-    let running = true;
-    let currentRule = rules.find(r => r.previousState === undefined);
+    setRunning(true);
+    runningRef.current = true;
   
+    let currentRule = rules.find(r => r.previousState === undefined);
     let localTape = [...tape];
     let localHeadPosition = headPosition;
   
-    while (running) {
+    while (runningRef.current) {
       const currentSymbol = localTape[localHeadPosition];
   
       if (!currentRule) {
-        running = false;
+        setRunning(false);
+        runningRef.current = false;
         console.log('Halted: No matching rule found');
         break;
       }
@@ -37,23 +45,23 @@ const EditorPage = () => {
         localTape[localHeadPosition] = writeSymbol;
         setTape([...localTape]);
       }
+  
       if (moveDirection === 'R') {
         localHeadPosition = Math.min(localHeadPosition + 1, localTape.length - 1);
         setHeadPosition(localHeadPosition);
         handleScrollRight();
       }
+  
       if (moveDirection === 'L') {
         localHeadPosition = Math.max(localHeadPosition - 1, 0);
         setHeadPosition(localHeadPosition);
         handleScrollLeft();
       }
-
+  
       await wait(600);
       currentRule = rules.find(r => r.name === nextState);
     }
   };
-  
-  
 
   function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -64,7 +72,8 @@ const EditorPage = () => {
   };
 
   const handleStop = () => {
-    // Logic for stopping the machine
+    setRunning(false);
+    runningRef.current = false;
   };
 
   const handleReset = () => {
@@ -111,10 +120,10 @@ const EditorPage = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    //if (!checkRules()) {
-     // setErrorMessage("Missing/Invalid fields in 1 or more rules. (Use 'na' for fields that should be empty)");
-     // return;
-   // }
+    if (!checkRules()) {
+      setErrorMessage("Missing/Invalid fields in 1 or more rules. (Use 'na' for fields that should be empty)");
+      return;
+    }
     if(configName === ""){
       setErrorMessage("Please type a configuration name.");
       return;
@@ -149,7 +158,6 @@ const EditorPage = () => {
       moveDirection: rule.moveDirection
     }));
   
-    // Set the rules state once after the loop
     setRules(newRules);
   };
 
