@@ -175,27 +175,51 @@ const EditorPage = () => {
       <div className="tape-window">
         <h3>Tape</h3>
         <div className="tape-container">
-          <button onClick={handleScrollLeft}>Scroll Left</button>
-          <div className="tape-wrapper">
-            <motion.div
-              className="tape"
-              initial={false}
-              animate={{ x: calculateOffset() }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            >
-              {tape.map((cell, index) => (
-                <motion.div
-                  key={index}
-                  className={`tape-cell ${index === headPosition ? 'head' : ''}`}
-                  style={{ width: 50, height: 50, display: 'inline-block', border: '1px solid black', textAlign: 'center', lineHeight: '50px' }}
-                >
-                  {cell}
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-          <button onClick={handleScrollRight}>Scroll Right</button>
-        </div>
+  <button onClick={handleScrollLeft}>Scroll Left</button>
+  <div className="tape-wrapper">
+    <motion.div
+      className="tape"
+      initial={false}
+      animate={{ x: calculateOffset() }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+    >
+      {tape.map((cell, index) => (
+        <motion.div
+          key={index}
+          className={`tape-cell ${index === headPosition ? 'head' : ''}`}
+          style={{
+            width: 50,
+            height: 50,
+            display: 'inline-block',
+            border: '1px solid black',
+            textAlign: 'center',
+            lineHeight: '50px'
+          }}
+        >
+          <input
+            type="text"
+            value={cell}
+            maxLength={1} // Optional: to limit each cell to a single character
+            onChange={(e) => {
+              const newTape = [...tape];
+              newTape[index] = e.target.value; // Update the value in the tape array
+              setTape(newTape); // Update the state to reflect changes
+            }}
+            style={{
+              width: '100%',
+              height: '100%',
+              textAlign: 'center',
+              border: 'none',
+              outline: 'none'
+            }}
+          />
+        </motion.div>
+      ))}
+    </motion.div>
+  </div>
+  <button onClick={handleScrollRight}>Scroll Right</button>
+</div>
+
         <div className="triangle"></div>
       </div>
       <div className="controls-window">
@@ -229,7 +253,7 @@ const EditorPage = () => {
                       const newRules = [...rules];
                       newRules[index].previousState = e.target.value;
                       setRules(newRules);
-                    }} style={{ width: '32px' }} />
+                    }} style={{ width: '72px' }} />
                   </div>
                   <div className="input-field">
                     <h5>read symbol</h5>
@@ -248,12 +272,13 @@ const EditorPage = () => {
                     }} style={{ width: '32px' }} />
                   </div>
                   <div className="input-field">
-                    <h5>next state</h5>
+                    <h5>‎ </h5>
+                    <h5>next state </h5>
                     <input type="text" value={rule.nextState ?? 'na'} onChange={(e) => {
                       const newRules = [...rules];
                       newRules[index].nextState = e.target.value;
                       setRules(newRules);
-                    }} style={{ width: '32px' }} />
+                    }} style={{ width: '72px' }} />
                   </div>
                   <div className="input-field">
                     <h5>move direction</h5>
