@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from "../hooks/UseAuth";
 
@@ -15,6 +16,7 @@ const EditorPage = () => {
   const [loadConfigName, setLoadConfigName] = useState("");
   const [rules, setRules] = useState([]); 
   const { logout, save, load, loadPage} = useAuth();
+  const location = useLocation();
 
   const runningRef = useRef(running);
 
@@ -22,6 +24,23 @@ const EditorPage = () => {
     runningRef.current = running;
   }, [running]);
   
+  useEffect(() => {
+    if (location.state) {
+      const { rules: loadedRules, configName: loadedConfigName } = location.state;
+      
+      if (loadedRules && loadedConfigName) {
+        setRules(loadedRules);
+        setConfigName(loadedConfigName);
+        setSuccessMessage("Configuration loaded successfully!");
+      } else {
+        console.log("Rules not found");
+      }
+    } else {
+      console.log("No location state found.");
+    }
+  }, [location.state]);
+  
+
   const handleRun = async () => {
     setRunning(true);
     runningRef.current = true;
@@ -32,7 +51,6 @@ const EditorPage = () => {
     let currentIndex = rules.indexOf(currentRule);
   
     while (runningRef.current) {
-      setCurrentRuleIndex(currentIndex); // Highlight the current rule
   
       const currentSymbol = localTape[localHeadPosition];
   
@@ -40,7 +58,7 @@ const EditorPage = () => {
         setRunning(false);
         runningRef.current = false;
         console.log('Halted: No matching rule found');
-        setCurrentRuleIndex(null); // Reset highlight
+        setCurrentRuleIndex(null);
         break;
       }
   
@@ -66,9 +84,10 @@ const EditorPage = () => {
       await wait(600);
       currentRule = rules.find(r => r.name === nextState && r.readSymbol == localTape[localHeadPosition]);
       currentIndex = rules.indexOf(currentRule);
+      setCurrentRuleIndex(currentIndex);
     }
   
-    setCurrentRuleIndex(null); // Reset highlight when done
+    setCurrentRuleIndex(null); 
   };
   
 

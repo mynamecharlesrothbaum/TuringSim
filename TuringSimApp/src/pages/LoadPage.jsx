@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/UseAuth";
 
@@ -7,6 +8,7 @@ const LoadPage = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const { load, loadConfigs } = useAuth(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchConfigurations = async () => {
@@ -45,8 +47,10 @@ const LoadPage = () => {
           moveDirection: rule.moveDirection,
         };
       });
-  
-      setRules(newRules);
+      console.log("Navigating with rules:", newRules);
+      navigate("/editor", { state: { rules: newRules, configName: result.configName } });
+
+
       setSuccessMessage(`Configuration loaded successfully`);
     } catch (error) {
       console.error("Error loading configuration:", error);
