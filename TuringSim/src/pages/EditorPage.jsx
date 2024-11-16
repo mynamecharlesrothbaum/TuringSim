@@ -4,8 +4,9 @@ import { useAuth } from "../hooks/UseAuth";
 
 const EditorPage = () => {
   const MAX_TAPE_LENGTH = 128;
-  const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(0));
+  const [tape, setTape] = useState(Array(MAX_TAPE_LENGTH).fill(""));
   const [running, setRunning] = useState(false);
+  const [currentRuleIndex, setCurrentRuleIndex] = useState(null);
   const [headPosition, setHeadPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [viewPosition, setViewPosition] = useState(MAX_TAPE_LENGTH / 2);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -28,14 +29,18 @@ const EditorPage = () => {
     let currentRule = rules.find(r => r.previousState === 'na');
     let localTape = [...tape];
     let localHeadPosition = headPosition;
+    let currentIndex = rules.indexOf(currentRule);
   
     while (runningRef.current) {
+      setCurrentRuleIndex(currentIndex); // Highlight the current rule
+  
       const currentSymbol = localTape[localHeadPosition];
   
       if (!currentRule) {
         setRunning(false);
         runningRef.current = false;
         console.log('Halted: No matching rule found');
+        setCurrentRuleIndex(null); // Reset highlight
         break;
       }
   
@@ -59,9 +64,13 @@ const EditorPage = () => {
       }
   
       await wait(600);
-      currentRule = rules.find(r => r.name === nextState);
+      currentRule = rules.find(r => r.name === nextState && r.readSymbol == localTape[localHeadPosition]);
+      currentIndex = rules.indexOf(currentRule);
     }
+  
+    setCurrentRuleIndex(null); // Reset highlight when done
   };
+  
 
   function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -78,7 +87,7 @@ const EditorPage = () => {
 
   const handleReset = () => {
     handleStop();
-    setTape(Array(MAX_TAPE_LENGTH).fill(0));
+    setTape(Array(MAX_TAPE_LENGTH).fill(""));
     setViewPosition((prev) => MAX_TAPE_LENGTH / 2);
     setHeadPosition((prev) => MAX_TAPE_LENGTH / 2);
   }
@@ -106,14 +115,17 @@ const EditorPage = () => {
 
     for (const rule of rules) {
       if (typeof rule === 'object' && rule !== null) {
-
-        rule.name = String(rule.name);
-        rule.previousState = String(rule.previousState);
-        rule.readSymbol = String(rule.readSymbol); 
-        rule.writeSymbol = String(rule.writeSymbol);
-        rule.nextState = String(rule.nextState);
-        rule.moveDirection = String(rule.moveDirection);
-
+    
+        const fields = ['name', 'previousState', 'readSymbol', 'writeSymbol', 'nextState', 'moveDirection'];
+    
+        for (const field of fields) {
+          rule[field] = String(rule[field]);
+    
+         if (rule[field] === "") {
+            rule[field] = "na";
+         }
+        }
+    
       } else {
         setErrorMessage("Invalid rule detected", rule);
       }
@@ -123,12 +135,12 @@ const EditorPage = () => {
       rule &&
       typeof rule === 'object' &&
       Object.keys(rule).length > 0 &&
-      rule.name && rule.name.trim().length > 0 &&
-      rule.previousState && rule.previousState.trim().length > 0 &&
-      rule.readSymbol && rule.readSymbol.trim().length > 0 &&
-      rule.writeSymbol && rule.writeSymbol.trim().length > 0 &&
-      rule.nextState && rule.nextState.trim().length > 0 &&
-      rule.moveDirection && rule.moveDirection.trim().length > 0
+      rule.name && rule.name.length > 0 &&
+      rule.previousState && rule.previousState.length > 0 &&
+      rule.readSymbol && rule.readSymbol.length > 0 &&
+      rule.writeSymbol && rule.writeSymbol.length > 0 &&
+      rule.nextState && rule.nextState.length > 0 &&
+      rule.moveDirection && rule.moveDirection.length > 0
     );
   };
 
@@ -173,10 +185,10 @@ const EditorPage = () => {
       console.log(`Rule ${index} name:`, rule.name); 
       return {
         name: rule.name === undefined || rule.name === '' ? 'defaultName' : rule.name, 
-        previousState: rule.previousState === undefined ? 'na' : rule.previousState,
-        readSymbol: rule.readSymbol,
-        writeSymbol: rule.writeSymbol,
-        nextState: rule.nextState === undefined ? 'na' : rule.nextState,
+        previousState: rule.previousState === undefined ? '' : rule.previousState,
+        readSymbol: rule.readSymbol === "na" ? "" : rule.readSymbol,
+        writeSymbol: rule.writeSymbol === "na" ? "" : rule.writeSymbol,
+        nextState: rule.nextState === undefined ? "" : rule.nextState,
         moveDirection: rule.moveDirection
       };
     });
@@ -198,50 +210,49 @@ const EditorPage = () => {
       <div className="tape-window">
         <h3>Tape</h3>
         <div className="tape-container">
-  <button onClick={handleScrollLeft}>Scroll Left</button>
-  <div className="tape-wrapper">
-    <motion.div
-      className="tape"
-      initial={false}
-      animate={{ x: calculateOffset() }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-    >
-      {tape.map((cell, index) => (
-        <motion.div
-          key={index}
-          className={`tape-cell ${index === headPosition ? 'head' : ''}`}
-          style={{
-            width: 50,
-            height: 50,
-            display: 'inline-block',
-            border: '1px solid black',
-            textAlign: 'center',
-            lineHeight: '50px'
-          }}
-        >
-          <input
-            type="text"
-            value={cell}
-            maxLength={1} // Optional: to limit each cell to a single character
-            onChange={(e) => {
-              const newTape = [...tape];
-              newTape[index] = e.target.value; // Update the value in the tape array
-              setTape(newTape); // Update the state to reflect changes
-            }}
-            style={{
-              width: '100%',
-              height: '100%',
-              textAlign: 'center',
-              border: 'none',
-              outline: 'none'
-            }}
-          />
-        </motion.div>
-      ))}
-    </motion.div>
-  </div>
-  <button onClick={handleScrollRight}>Scroll Right</button>
-</div>
+          <button onClick={handleScrollLeft}>Scroll Left</button>
+          <div className="tape-wrapper">
+            <motion.div
+              className="tape"
+              initial={false}
+              animate={{ x: calculateOffset() }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
+              {tape.map((cell, index) => (
+                <motion.div
+                  key={index}
+                  className={`tape-cell ${index === headPosition ? 'head' : ''}`}
+                  style={{
+                    width: 50,
+                    height: 50,
+                    display: 'inline-block',
+                    border: '1px solid black',
+                    textAlign: 'center',
+                    lineHeight: '50px'
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={cell}
+                    maxLength={1}
+                    onChange={(e) => {
+                      const newTape = [...tape];
+                      newTape[index] = e.target.value;
+                      setTape(newTape);
+                    }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      textAlign: 'center',
+                      border: 'none',
+                      outline: 'none'
+                    }}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+          <button onClick={handleScrollRight}>Scroll Right</button>
+        </div>
 
         <div className="triangle"></div>
       </div>
@@ -257,7 +268,8 @@ const EditorPage = () => {
         <div className="rules-editor" style={{ overflowY: 'auto', maxHeight: '400px', padding: '10px', border: '1px solid #ccc', overflowX: 'hidden' }}>
 
           {rules.map((rule, index) => (
-            <div key={index} className="rule" style={{ overflow: 'hidden' }}>
+            <div key={index} className="rule" style={{ overflow: 'hidden' ,
+              backgroundColor: currentRuleIndex === index ? 'lightblue' : 'white',}}>
               <div className="rule-inputs">
                 <div className="name-fields">
                   <div className="input-field">
@@ -270,14 +282,6 @@ const EditorPage = () => {
                   </div>
                 </div>
                 <div className="state-fields">
-                  <div className="input-field">
-                    <h5>previous state</h5>
-                    <input type="text" value={rule.previousState ?? 'na'} onChange={(e) => {
-                      const newRules = [...rules];
-                      newRules[index].previousState = e.target.value.toString();
-                      setRules(newRules);
-                    }} style={{ width: '72px' }} />
-                  </div>
                   <div className="input-field">
                     <h5>read symbol</h5>
                     <input type="text" value={rule.readSymbol ?? ''} onChange={(e) => {
