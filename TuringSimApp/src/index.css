@@ -12,7 +12,7 @@ body, html {
   align-items: center;
   background-color: #546f93;
 }
-/* Title Container */
+
 .title-container {
   background-color: #f0f0f0;
   padding: 15px 30px;
@@ -29,7 +29,6 @@ body, html {
   text-transform: uppercase;
 }
 
-/* Login Container */
 .login-container, .password-container {
   margin-bottom: 10px;
   display: flex;
@@ -120,7 +119,6 @@ input {
   background-color: #6889ae;
 }
 
-/* Controls Section */
 .controls {
   display: flex;
   gap: 10px;
