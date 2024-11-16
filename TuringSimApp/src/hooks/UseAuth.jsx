@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
-import { getAuthentication, getRegistration, getSave, getLoad } from "../api/apiService";
+import { getAuthentication, getRegistration, getSave, getLoad, getConfigs } from "../api/apiService";
 import dayjs from 'dayjs';
 
 const AuthContext = createContext();
@@ -58,11 +58,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const load = async (data) => {
-    data = JSON.parse(data);
+    //data = JSON.parse(data);
     if (user && user.username) {
       data.username = user.username;
     }
-    console.log(data);
+    console.log("data in load", data);
     try{
       const response = await getLoad(data);
       console.log("load got response: ", response);
@@ -72,6 +72,26 @@ export const AuthProvider = ({ children }) => {
       console.error("Error while loading:", error);
     }
   };
+
+  const loadConfigs = async () => {
+    if (user && user.username) {
+      console.log(user.username);
+      try {
+        const response = await getConfigs(user.username);
+        console.log("load got response: ", response);
+        return response
+      }
+      catch (error) {
+        console.error("Error while loading:", error);
+      }
+    }
+  }
+
+  const loadPage = async () => {
+    if (user && user.username) {
+      navigate("/loads")
+    }
+  }
 
   // call this function to sign out logged in user
   const logout = () => {
@@ -87,6 +107,8 @@ export const AuthProvider = ({ children }) => {
       register,
       save,
       load,
+      loadPage,
+      loadConfigs,
     }),
     [user]
   );

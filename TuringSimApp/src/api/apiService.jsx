@@ -5,6 +5,7 @@ const authenticationsEndpoint = "/authentications";
 const registrationsEndpoint = "/registrations";
 const savesEndpoint = "/saves";
 const loadsEndpoint = "/loads";
+const loadConfigsEndpoint = "/load-configs";
 
 export const fetchData = async () => {
   try {
@@ -51,3 +52,12 @@ export const getLoad = async (data) => {
   return response.data;
 }
  
+export const getConfigs = async (username) => {
+  const data = { username };
+  const response = await axios.post(`${baseURL}${loadConfigsEndpoint}`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+}

@@ -14,7 +14,7 @@ const EditorPage = () => {
   const [configName, setConfigName] = useState("");
   const [loadConfigName, setLoadConfigName] = useState("");
   const [rules, setRules] = useState([]); 
-  const { logout, save, load} = useAuth();
+  const { logout, save, load, loadPage} = useAuth();
 
   const runningRef = useRef(running);
 
@@ -169,36 +169,8 @@ const EditorPage = () => {
   };
 
   const handleLoadRules = async () => {
-    setErrorMessage(null);
-    setSuccessMessage(null);
-  
-    if (loadConfigName === "") {
-      setErrorMessage("Please enter a configuration name.");
-      return;
-    }
-  
-    const result = await load(JSON.stringify({ loadConfigName }));
-    console.log("rules got in handleLoad",result.rules);
-
-
-    const newRules = result.rules.map((rule, index) => {
-      console.log(`Rule ${index} name:`, rule.name); 
-      return {
-        name: rule.name === undefined || rule.name === '' ? 'defaultName' : rule.name, 
-        previousState: rule.previousState === undefined ? '' : rule.previousState,
-        readSymbol: rule.readSymbol === "na" ? "" : rule.readSymbol,
-        writeSymbol: rule.writeSymbol === "na" ? "" : rule.writeSymbol,
-        nextState: rule.nextState === undefined ? "" : rule.nextState,
-        moveDirection: rule.moveDirection
-      };
-    });
-  
-    setRules(newRules);
+    await loadPage();
   };
-
-  const handleSetRules = async () => {
-
-  }
 
   const calculateOffset = () => {
     const offset = (1000 / 2) - (50 / 2);
@@ -332,13 +304,11 @@ const EditorPage = () => {
         </div>
         <div className="save-load-button-window">
           <div className="save-buttons">
-            <button onClick={handleSetRules}> Set Rules </button>
             <button onClick={handleSaveRules}>Save Configuration </button>
             <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
           </div>
           <div className="load-buttons">
             <button onClick={handleLoadRules}>Load Configuration </button>
-            <input id="load_config_name" type="text" value={loadConfigName} onChange={(e) => setLoadConfigName(e.target.value)} ></input>
           </div>
         </div>
         {errorMessage && (
