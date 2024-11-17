@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "./useLocalStorage";
-import { getAuthentication, getRegistration, getSave, getLoad, getConfigs } from "../api/apiService";
+import { getAuthentication, getRegistration, getSave, getLoad, getConfigs, deleteConfig } from "../api/apiService";
 import dayjs from 'dayjs';
 
 const AuthContext = createContext();
@@ -87,6 +87,21 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const deleteConfigId = async (data) => {
+    if (user && user.username) {
+      data.username = user.username;
+      console.log("delete:", data);
+      try {
+        const response = await deleteConfig(data);
+        console.log("delete got response: ", response);
+        return response
+      }
+      catch (error) {
+        console.error("Error while Deleting a configuration:", error);
+      }
+    }
+  }
+
   const loadPage = async () => {
     if (user && user.username) {
       navigate("/loads")
@@ -109,6 +124,7 @@ export const AuthProvider = ({ children }) => {
       load,
       loadPage,
       loadConfigs,
+      deleteConfigId,
     }),
     [user]
   );

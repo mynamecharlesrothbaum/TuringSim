@@ -157,20 +157,22 @@ app.post('/saves', async (req, res) => {
     }
 });
 
+//endpoint for loading full configuration
 app.post('/loads', async (req, res) => {
     console.log("hit loads endpoint");
     try {
-        const {loadConfigName, username} = req.body;
-        console.log("config name:", loadConfigName);
+        console.log(req.body);
+        const {configId, username} = req.body;
+        console.log("config id:", configId);
         console.log("username:", username);
-        if (!username || !loadConfigName) {
+        if (!username || !configId) {
             return res.status(400).json({ error: 'Missing username or configuration name' });
         }
 
         const userId = await getUserId(username);
-        const configuration = await getConfiguration(userId, loadConfigName);
-        const states = await getStates(configuration.config_id);
-        const transitions = await getTransitions(configuration.config_id);
+        const configuration = await getConfigurationFromId(userId, configId);
+        const states = await getStates(configId);
+        const transitions = await getTransitions(configId);
 
 
         configuration.tape_contents = `[${configuration.tape_contents}]`;
@@ -198,6 +200,55 @@ app.post('/loads', async (req, res) => {
     }
 });
 
+//endpoint for getting the configurations a user has saved
+app.post('/load-configs', async (req, res) => {
+    try {
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ error: 'Missing username' });
+        }
+
+        const userId = await getUserId(username);
+        console.log("user-configs: userId:", userId);
+        const configurations = await getAllConfigurations(userId);
+        
+        return res.status(200).json(configurations);
+    } catch (error) {
+        console.error("Error loading configs:", error);
+        return res.status(500).json({ error: 'Unable to load configs' });
+    }
+});
+
+//endpoint for deleting a configuration
+app.post('/delete-config', async (req, res) => {
+    try {
+
+        const { user_config } = req.body;
+        const { configId, username } = user_config;
+
+        console.log("delete: username: ", username);
+        console.log("delete: configId: ", configId);
+
+        if (!username) {
+            return res.status(400).json({ error: 'Missing username' });
+        }
+
+        const userId = await getUserId(username);
+        console.log("user-configs: userId:", userId);
+        const result = await deleteConfiguration(userId, configId);
+        
+        return res.status(200).json("Deleted configuration");
+    } catch (error) {
+        console.error("Error loading configs:", error);
+        return res.status(500).json({ error: 'Unable to load configs' });
+    }
+});
+
+
+
+
+
 function constructRules(states, transitions) {
     const stateIdToName = {};
     states.forEach(state => {
@@ -218,6 +269,22 @@ function constructRules(states, transitions) {
     return rules;
 }
 
+async function getAllConfigurations(userId) {
+    const sql = 'SELECT * FROM Configurations WHERE user_id = ?';
+    const params = [userId];
+    const result = await queryAsync(sql, params);
+
+    if (result.length > 0){
+        console.log(result);
+        return result;
+
+    }
+    else{
+        console.error("Configurations not found");
+        throw new Error('Configurations not found');
+    }
+}
+
 
 async function getConfiguration(userId, configName) {
     const sql = 'SELECT * FROM Configurations WHERE user_id = ? AND name = ?';
@@ -227,7 +294,39 @@ async function getConfiguration(userId, configName) {
         return result[0];
     } else {
         console.error("Configuration not found");
-        throw new Error('Configuration not found');
+    }
+}
+
+async function getConfigurationFromId(userId, configId) {
+    const sql = 'SELECT * FROM Configurations WHERE user_id = ? AND config_id = ?';
+    const params = [userId, configId];
+    const result = await queryAsync(sql, params);
+    if (result.length > 0) {
+        return result[0];
+    } else {
+        console.error("Configuration not found");
+    }
+}
+
+async function deleteConfiguration(userId, configId) {
+    const sqlCheck = 'SELECT * FROM Configurations WHERE user_id = ? AND config_id = ?';
+    const paramsCheck = [userId, configId];
+    const result = await queryAsync(sqlCheck, paramsCheck);
+
+    if (result.length > 0) {
+        console.log("Configuration found. Proceeding to delete.");
+
+        await queryAsync('DELETE FROM Transitions WHERE config_id = ?', [configId]);
+        await queryAsync('DELETE FROM States WHERE config_id = ?', [configId]);
+
+        const sqlDelete = 'DELETE FROM Configurations WHERE user_id = ? AND config_id = ?';
+        const paramsDelete = [userId, configId];
+        await queryAsync(sqlDelete, paramsDelete);
+
+        console.log(`Configuration with config_id ${configId} deleted successfully.`);
+        return { message: 'Configuration deleted successfully' };
+    } else {
+        console.error("Configuration not found");
     }
 }
 

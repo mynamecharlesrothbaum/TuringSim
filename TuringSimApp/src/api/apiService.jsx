@@ -6,6 +6,7 @@ const registrationsEndpoint = "/registrations";
 const savesEndpoint = "/saves";
 const loadsEndpoint = "/loads";
 const loadConfigsEndpoint = "/load-configs";
+const deleteConfigEndpoint = "/delete-config";
 
 export const fetchData = async () => {
   try {
@@ -55,6 +56,16 @@ export const getLoad = async (data) => {
 export const getConfigs = async (username) => {
   const data = { username };
   const response = await axios.post(`${baseURL}${loadConfigsEndpoint}`, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+}
+
+export const deleteConfig = async (user_config) => {
+  const data = { user_config };
+  const response = await axios.post(`${baseURL}${deleteConfigEndpoint}`, data, {
     headers: {
       'Content-Type': 'application/json'
     }

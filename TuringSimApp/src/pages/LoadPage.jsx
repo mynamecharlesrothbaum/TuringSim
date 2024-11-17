@@ -7,7 +7,7 @@ const LoadPage = () => {
   const [selectedConfig, setSelectedConfig] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const { load, loadConfigs } = useAuth(); 
+  const { load, loadConfigs, deleteConfigId } = useAuth(); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,16 +57,12 @@ const LoadPage = () => {
       setErrorMessage("Failed to load the configuration");
     }
   };
-  
-  
-  
-  
 
   const handleDelete = async (configId) => {
     setErrorMessage(null);
     setSuccessMessage(null);
     try {
-      await deleteConfig(configId);
+      await deleteConfigId({ configId });
       setConfigurations(configurations.filter(config => config.config_id !== configId));
       setSuccessMessage("Configuration deleted successfully");
     } catch (error) {
