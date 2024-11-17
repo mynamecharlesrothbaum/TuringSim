@@ -17,6 +17,8 @@ const EditorPage = () => {
   const [rules, setRules] = useState([]); 
   const { logout, save, load, loadPage} = useAuth();
   const location = useLocation();
+  const [sliderValue, setSliderValue] = useState(500);
+  const [simulationSpeed, setSimulationSpeed] = useState(500);
 
   const runningRef = useRef(running);
 
@@ -45,11 +47,11 @@ const EditorPage = () => {
     setRunning(true);
     runningRef.current = true;
   
-    let currentRule = rules.find(r => r.previousState === 'na');
     let localTape = [...tape];
     let localHeadPosition = headPosition;
+    let currentRule = rules.find(r => r.readSymbol == localTape[localHeadPosition]);
     let currentIndex = rules.indexOf(currentRule);
-  
+
     while (runningRef.current) {
   
       const currentSymbol = localTape[localHeadPosition];
@@ -81,13 +83,19 @@ const EditorPage = () => {
         handleScrollLeft();
       }
   
-      await wait(600);
+      
       currentRule = rules.find(r => r.name === nextState && r.readSymbol == localTape[localHeadPosition]);
       currentIndex = rules.indexOf(currentRule);
       setCurrentRuleIndex(currentIndex);
+      await wait(simulationSpeed);
     }
   
     setCurrentRuleIndex(null); 
+  };
+
+  const handleSliderChange = (event) => {
+    setSliderValue(event.target.value);
+    setSimulationSpeed(1000 - sliderValue);
   };
   
 
@@ -253,15 +261,39 @@ const EditorPage = () => {
         <button onClick={handleStep}>Step</button>
         <button onClick={handleStop}>Stop</button>
         <button onClick={handleReset}>Reset</button>
+        <div style={{ padding: '20px' }}>
+          <p htmlFor="slider">Simulation Speed: {sliderValue / 10} % </p>
+            <input
+              type="range"
+              id="slider"
+              min="0"
+              max="1000"
+              value={sliderValue}
+              onChange={handleSliderChange}
+              style={{ width: '200px'}}
+            />
+        <div className="save-load-button-window">
+          <div className="save-buttons">
+            <button onClick={handleSaveRules}>Save Configuration </button>
+            <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
+          </div>
+          <div className="load-buttons">
+            <button onClick={handleLoadRules}>Load Configuration </button>
+          </div>
+        </div>
+      <div className="logout-button">
+        <button onClick={handleLogout}>Logout</button>
+      </div>
+    </div>
+  
       </div>
       <div className="rules-window">
         <h3>Rules</h3>
         <div className="rules-editor" style={{ overflowY: 'auto', maxHeight: '400px', padding: '10px', border: '1px solid #ccc', overflowX: 'hidden' }}>
 
           {rules.map((rule, index) => (
-            <div key={index} className="rule" style={{ overflow: 'hidden' ,
-              backgroundColor: currentRuleIndex === index ? 'lightblue' : 'white',}}>
-              <div className="rule-inputs">
+            <div key={index} className="rule" style={{ overflow: 'hidden' ,}}>
+              <div className="rule-inputs" style={{backgroundColor: currentRuleIndex === index ? '#305d8a' : '#598abe',}}>
                 <div className="name-fields">
                   <div className="input-field">
                     <h5>state name</h5>
@@ -321,15 +353,6 @@ const EditorPage = () => {
           }])}>Add Rule</button>
 
         </div>
-        <div className="save-load-button-window">
-          <div className="save-buttons">
-            <button onClick={handleSaveRules}>Save Configuration </button>
-            <input id="config_name" type="text" value={configName} onChange={(e) => setConfigName(e.target.value)} ></input>
-          </div>
-          <div className="load-buttons">
-            <button onClick={handleLoadRules}>Load Configuration </button>
-          </div>
-        </div>
         {errorMessage && (
           <div style={{ color: "red", marginTop: "10px" }}>
             {errorMessage}
@@ -340,9 +363,6 @@ const EditorPage = () => {
             {successMessage}
           </div>
         )}
-      </div>
-      <div className="logout-window">
-        <button onClick={handleLogout}>Logout</button>
       </div>
     </div>
   );
