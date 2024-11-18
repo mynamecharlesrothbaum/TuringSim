@@ -19,6 +19,8 @@ const EditorPage = () => {
   const location = useLocation();
   const [sliderValue, setSliderValue] = useState(500);
   const [simulationSpeed, setSimulationSpeed] = useState(500);
+  const [currentState, setCurrentState] = useState(null);
+
 
   const runningRef = useRef(running);
 
@@ -97,15 +99,66 @@ const EditorPage = () => {
     setSliderValue(event.target.value);
     setSimulationSpeed(1000 - sliderValue);
   };
-  
 
   function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  const handleStep = () => {
-    // Logic for executing a single step
+  const handleStep = async () => {
+    if (!running) {
+      setRunning(true);
+      runningRef.current = true;
+  
+      let localTape = [...tape];
+      let localHeadPosition = headPosition;
+  
+      let currentRule = rules.find(r => r.name === currentState && r.readSymbol === localTape[localHeadPosition]);
+      let currentIndex = rules.indexOf(currentRule);
+  
+      if (!currentRule) {
+        setRunning(false);
+        runningRef.current = false;
+        console.log('Halted: No matching rule found');
+        setCurrentRuleIndex(null);
+        return;
+      }
+  
+      const { readSymbol, writeSymbol, moveDirection, nextState } = currentRule;
+      const currentSymbol = localTape[localHeadPosition];
+  
+      if (currentSymbol.toString() === readSymbol.toString()) {
+        localTape[localHeadPosition] = writeSymbol;
+        setTape([...localTape]);
+      }
+  
+      if (moveDirection === 'R') {
+        localHeadPosition = Math.min(localHeadPosition + 1, localTape.length - 1);
+        setHeadPosition(localHeadPosition);
+        handleScrollRight();
+      } 
+      else if (moveDirection === 'L') {
+        localHeadPosition = Math.max(localHeadPosition - 1, 0);
+        setHeadPosition(localHeadPosition);
+        handleScrollLeft();
+      }
+  
+      setCurrentState(nextState);
+
+      currentIndex = rules.indexOf(currentRule);
+      setCurrentRuleIndex(currentIndex);
+  
+      if (!currentRule) {
+        setRunning(false);
+        runningRef.current = false;
+        console.log('Halted: No matching rule found after the step');
+        setCurrentRuleIndex(null);
+      }
+  
+      setRunning(false);
+      runningRef.current = false;
+    }
   };
+  
 
   const handleStop = () => {
     setRunning(false);
